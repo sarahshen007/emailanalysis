@@ -1,0 +1,6 @@
+#### Requirements ####
+pywin32
+openpyxl
+bs4
+colorama
+spacy

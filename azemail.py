@@ -20,12 +20,14 @@ import openpyxl
 from win32com import client
 from tkinter import filedialog
 from bs4 import BeautifulSoup
+from colorama import Fore
+from colorama import Style
 
 # Message to user
-print("=========================================")
-print("Welcome to the AZ Email Analysis Program!")
-print("Please select the folder containing all your emails.")
-print("=========================================\n")
+print(f"{Fore.LIGHTBLUE_EX}===\n===")
+print(f"{Fore.LIGHTBLUE_EX}Welcome to the {Fore.RED}AZ Email Analysis {Fore.LIGHTBLUE_EX}Program!")
+print("This program will: \n\t1. read all the emails (.msg files) in your local documents folder\n\t2. process the data\n\t3. add entries to the end of a spreadsheet.\nPlease select the folder containing all your emails.")
+print("===\n===\n")
 time.sleep(1)
 
 # Create an folder input dialog with tkinter
@@ -87,9 +89,9 @@ for i, _ in enumerate(email_list):
    
 
 try:
-   print("=========================================")
+   print("===\n===")
    print("Please choose the spreadsheet where you keep logs.")
-   print("=========================================\n")
+   print("===\n===\n")
    time.sleep(1)
    
    excelPath = os.path.normpath(filedialog.askopenfilename(title='Select File'))
@@ -108,10 +110,12 @@ try:
       sheet.append(row)
    
    wb.save(excelPath)
+   wb.close()
 except:
    print("Error adding to spreadsheet. Please check that you chose a valid file.\n")
 
 
-print("=========================================")
+print("===\n===\n===")
 print("All done! Thank you for using AZ Email Analysis!")
-print("=========================================")
+print("===\n===\n===\n")
+
