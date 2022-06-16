@@ -24,9 +24,9 @@ def emailCreator(info):
     ipAddress = info['Extracted IP Address']
     browser = info['Extracted Browser/OS']
     cookies = info['Cookies']
-    
+    product = info['Product']
 
-    newEmail = Email(date, issueSummary, '', name, customerEmail, comment, ipAddress, browser, cookies, False)
+    newEmail = Email(date, issueSummary, product, name, customerEmail, comment, ipAddress, browser, cookies, False)
     return newEmail
 
 def replaceCharacters(text):

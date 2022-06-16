@@ -98,13 +98,14 @@ for i, _ in enumerate(email_list):
    # Generate summary of comment
    summary = info['Comment Value']
 
-   try: 
-      predictedIssue = azsummary.generateIssueSummary(summary, prev_data)
-      print(predictedIssue)
+   #try: 
+   predictedIssue = azsummary.generateIssueSummary(summary, prev_data)
+   print(predictedIssue)
 
-      info['Issue Summary'] = predictedIssue
-   except:
-      info['Issue Summary'] = 'null'
+   info['Issue Summary'] = predictedIssue[0]
+   info['Product'] = predictedIssue[1]
+   #except:
+      #info['Issue Summary'] = 'null'
    
 
    newEmail = azsort.emailCreator(info)
