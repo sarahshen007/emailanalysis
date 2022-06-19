@@ -7,6 +7,12 @@ import sqlite3
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.metrics.distance import jaccard_distance
+from nltk.util import ngrams
+nltk.download('words')
+from nltk.corpus import words
+
+correct_words = words.words()
 
 productCorrespondence = {}
 stop_words = set(stopwords.words('english'))
@@ -154,7 +160,7 @@ def generateData(excelPath):
     prevIssue = 'General Inquiry'
 
     issuesCol = [str(issue.value).lower() for issue in sheet['B']]
-
+    
     for i in range(len(issuesCol)-1, -1, -1):
         issueValue = issuesCol[i]
 
@@ -186,13 +192,18 @@ def generateData(excelPath):
         if not issuesCell in data:
             data[issuesCell] = {}
 
+        numWords = 0
         for word in filteredComment:
+            numWords += 1
             if word in data[issuesCell]:
                 data[issuesCell][word] += 1
             elif word in relevant_words:
                 data[issuesCell][word] = 1
 
-    print("Finished generating data...")
+        for word in data[issuesCell]:
+            if not numWords == 0:
+                data[issuesCell][word] /= numWords
+
     wb.close()    
     return data
 
@@ -214,6 +225,7 @@ def generateIssueSummary(text, prevData):
         wordsInText.add(keyword)
 
     issuesList = []
+    
     for issue in prevData:
         issuesList.append(issue)
 
@@ -222,16 +234,15 @@ def generateIssueSummary(text, prevData):
     for i in range(len(issuesList)):
         issue = issuesList[i]
         comparisonWeight = 0
-        
+
         for keyword in prevData[issue]:
+            
             if keyword in issuesList and keyword in wordsInText:
-                comparisonWeight += prevData[issue][keyword] * textFrequency[keyword] * 2
+                comparisonWeight += prevData[issue][keyword] * textFrequency[keyword] * 1.1
             elif keyword in wordsInText:
                 comparisonWeight += prevData[issue][keyword] * textFrequency[keyword]
         
         comparisonWeights.append(comparisonWeight)
-
-    print(comparisonWeights)
 
     maxIndex = 0
     maxValue = 0
@@ -243,6 +254,8 @@ def generateIssueSummary(text, prevData):
     if maxValue == 0:
         return "General Inquiry"
 
+    print()
+    print(text)
     print("MaxIndex=", maxIndex)
     print("MaxValue=", maxValue)
     print("issue=", issuesList[maxIndex])

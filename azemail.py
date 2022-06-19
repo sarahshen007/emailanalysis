@@ -27,21 +27,21 @@ print("=========\n")
 time.sleep(1)
 print("This program will: \n\t1. read all the emails (.msg files) in your local documents folder\n\t2. process the data\n\t3. add entries to the end of a spreadsheet.\n")
 time.sleep(1)
-print("Please select the folder containing all your emails.\n")
+print("Please select the folder containing all your emails...")
 time.sleep(1)
 
-# Create an folder input dialog with tkinter
+# Create an folder input dialog with tkinter, get folder and spreadsheet paths
 folder_path = os.path.normpath(filedialog.askdirectory(title='Select Folder'))
 
-print("Thank you for choosing your email folder...\n")
+print("Thank you for choosing your email folder.\n")
 time.sleep(1)
 
-print("Please choose the spreadsheet where you keep logs.\n")
+print("Please choose the spreadsheet where you keep logs...")
 excelPath = os.path.normpath(filedialog.askopenfilename(title='Select File'))
 
-print("Thank you for choosing your spreadsheet file...\n")
+print("Thank you for choosing your spreadsheet file.\n")
 time.sleep(1)
-print("Parsing emails...")
+print("Parsing spreadsheet...")
 
 # Initialise & Populate list of emails
 email_list = [file for file in os.listdir(folder_path) if file.endswith(".msg")]
@@ -55,6 +55,9 @@ emails_log = []
 # Data for prediction of issue
 prev_data = azsummary.generateData(excelPath)
 
+print("Finished parsing spreadsheet.")
+print()
+print("Parsing emails...")
 for x in prev_data.keys():
    print(x)
    for y in prev_data[x].keys():
@@ -69,7 +72,9 @@ for i, _ in enumerate(email_list):
 
    # Dictionary to keep track of info from current email
    info = {}
-   info['date'] = str(msg.SentOn).split(' ')[0] # Date email was received
+   date = str(msg.SentOn).split(' ')[0].split('-')
+   dateString = date[1].strip('0') + "/" + date[2] + "/" + date[0]
+   info['date'] = dateString # Date email was received
    
    regex = msg.HTMLBody.replace('\r', '').replace('\n', '') # Remove unecessary characters from msg html
    soup = BeautifulSoup(regex, "html.parser") # Parse into html using soup
@@ -98,20 +103,19 @@ for i, _ in enumerate(email_list):
    # Generate summary of comment
    summary = info['Comment Value']
 
-   #try: 
    predictedIssue = azsummary.generateIssueSummary(summary, prev_data)
    print(predictedIssue)
 
    info['Issue Summary'] = predictedIssue[0]
    info['Product'] = predictedIssue[1]
-   #except:
-      #info['Issue Summary'] = 'null'
    
-
+   # Make new email object with info
    newEmail = azsort.emailCreator(info)
+
    # Add email object to emails log
    emails_log.append(newEmail)
 
+print("Finished parsing emails.\n")
 try:
    print("Adding to log to spreadsheet...\n")
    wb = openpyxl.load_workbook(excelPath) 
@@ -121,7 +125,7 @@ try:
    data = []
 
    for email in emails_log:
-      row = (email.date, email.issueSummary, email.product, email.name, email.customerEmail, email.comment, email.ipAddress, email.browser, email.cookies, email.followup)
+      row = (email.date, email.issueSummary, email.product, email.name, email.customerEmail, email.comment, email.ipAddress, email.cookies, email.followup)
       data.append(row)
    
    for row in data:
