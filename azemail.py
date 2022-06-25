@@ -20,6 +20,19 @@ from tkinter import filedialog
 from bs4 import BeautifulSoup
 from colorama import Fore
 
+# Loops through all Outlook folders to find given folder_name
+def get_folder_by_name(folder_name, root_folder):
+
+    for folder in root_folder.Folders: 
+
+        if folder.Name == folder_name:
+
+            print ('Awesome, ' + folder_name + ' was found!')
+
+            found_folder = folder
+
+    return found_folder
+
 # Message to user
 print(f"{Fore.LIGHTBLUE_EX}=========")
 print(f"{Fore.LIGHTBLUE_EX}Welcome to the {Fore.RED}AZ Email Analysis {Fore.LIGHTBLUE_EX}Program!")
@@ -30,11 +43,16 @@ time.sleep(1)
 print("Please select the folder containing all your emails...")
 time.sleep(1)
 
-# Create an folder input dialog with tkinter, get folder and spreadsheet paths
-folder_path = os.path.normpath(filedialog.askdirectory(title='Select Folder'))
+# Connect to outlook
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+accounts= win32com.client.Dispatch("Outlook.Application").Session.Accounts
 
-print("Thank you for choosing your email folder.\n")
-time.sleep(1)
+account = accounts[0]
+print("Welcome,", account.DisplayName)
+root_folder = outlook.Folders(account.DisplayName)
+emails_folder = get_folder_by_name("CS EMAILS", root_folder)
+
+messages = emails_folder.Items
 
 print("Please choose the spreadsheet where you keep logs...")
 excelPath = os.path.normpath(filedialog.askopenfilename(title='Select File'))
@@ -44,14 +62,12 @@ time.sleep(1)
 print("Parsing spreadsheet...")
 
 # Initialise & Populate list of emails
-email_list = [file for file in os.listdir(folder_path) if file.endswith(".msg")]
-
-# Connect to Outlook with MAPI
-outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+email_list = [file for file in messages]
 
 # Log keeping track of email objects
 emails_log = []
 
+print("Generating data...")
 # Data for prediction of issue
 prev_data = azsummary.generateData(excelPath)
 

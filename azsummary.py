@@ -1,15 +1,9 @@
 # Module to generate email summary
-import os
 import openpyxl
 import re
-import string
-import sqlite3
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-from nltk.metrics.distance import jaccard_distance
-from nltk.util import ngrams
-nltk.download('words')
 from nltk.corpus import words
 
 correct_words = words.words()
@@ -146,24 +140,28 @@ def removeStopWords(text):
 
     return filtered_sentence
 
-def generateData(excelPath):
+def generateData(path):
     #db = sqlite3.connect('azemail.db')
     global relevant_words
     global productCorrespondence
 
-    wb = openpyxl.load_workbook(excelPath) 
-    wb.active = wb['CS Feedback']
-    sheet = wb.active
+    print("Generate_Data")
+
+    wb = openpyxl.load_workbook(path, read_only=True) 
+    sheet = wb['CS Feedback']
+    b = sheet['B']
     data = {}
+
+    print("Retrieved_Sheet")
 
     issuesCol = []
     prevIssue = 'General Inquiry'
 
-    issuesCol = [str(issue.value).lower() for issue in sheet['B']]
+    issuesCol = [str(issue.value).lower() for issue in b]
     
-    for i in range(len(issuesCol)-1, -1, -1):
+    for i in range(len(issuesCol)-1, 0, -1):
         issueValue = issuesCol[i]
-
+        print(issueValue)
         if issueValue == 'none':
             issuesCol[i] = prevIssue
         else:
@@ -174,6 +172,8 @@ def generateData(excelPath):
 
 
     commentsCol = [removeStopWords(str(comment.value).lower()) for comment in sheet['F']]
+    commentsCol = commentsCol[1:]
+    issuesCol = issuesCol[1:]
 
     allWords = ""
     for entry in commentsCol:
@@ -193,6 +193,7 @@ def generateData(excelPath):
             data[issuesCell] = {}
 
         numWords = 0
+
         for word in filteredComment:
             numWords += 1
             if word in data[issuesCell]:
